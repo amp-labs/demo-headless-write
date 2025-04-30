@@ -1,12 +1,12 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './dialog'
-import {   Installaltion } from '@amp-labs/react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog'
+import { Installation } from '@amp-labs/react'
 
 interface InstallDialogProps {
   isOpen: boolean
   onClose: () => void
   connectionId?: string
   provider: string
-  installation: Installation
+  installation?: Installation
 }
 
 export function InstallDialog({ isOpen, onClose, connectionId, provider, installation }: InstallDialogProps) {
@@ -24,6 +24,21 @@ export function InstallDialog({ isOpen, onClose, connectionId, provider, install
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">
                 Connection ID: <span className="font-medium">{connectionId}</span>
+              </p>
+            </div>
+        
+          )}
+          {installation && (
+              <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">
+                Installation ID: <span className="font-medium">{installation.id}</span>
+              </p>
+            </div>
+          )}
+          {!installation && (
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">
+                No installation found.
               </p>
             </div>
           )}

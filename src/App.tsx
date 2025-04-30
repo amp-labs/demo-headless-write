@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import './App.css'
-import { ConnectProvider, AmpersandProvider } from '@amp-labs/react'
-import '@amp-labs/react/styles';
+
+import { ConnectProvider, AmpersandProvider,  InstallationProvider, useConnection, useInstallation } from '@amp-labs/react'
+import '@amp-labs/react/styles'; // Import the styles for the Ampersand SDK (ConnectProvider
+
+import { InstallDialog } from './components/install-dialog'
 import { CenteredContainer } from './components/ui/centered-container'
-import { InstallationProvider, useConnection, useInstallation } from '@amp-labs/react';
-import { InstallDialog } from './components/ui/install-dialog'
 import { Button } from './components/ui/button'
 
 const apiKey = import.meta.env.VITE_AMP_API_KEY
@@ -30,6 +30,7 @@ function InstallIntegration() {
   const { installation } = useInstallation()
   const [isDialogOpen, setIsDialogOpen] = useState(true)
 
+  // If the connection is not established, show the ConnectProvider component 
   if (!connection) {
     return (
       <CenteredContainer>
@@ -50,6 +51,7 @@ function InstallIntegration() {
     )
   }
 
+  // If the connection is established, show the InstallDialog component
   return (
     <CenteredContainer>
       <div className="flex flex-col items-center gap-4">
