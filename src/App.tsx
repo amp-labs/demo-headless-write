@@ -7,11 +7,16 @@ import { InstallDialog } from './components/install-dialog'
 import { CenteredContainer } from './components/ui/centered-container'
 import { Button } from './components/ui/button'
 
+import { FieldMappingTable } from './components/FieldMappingTable/FieldMappingTable';
+
+const SHOW_INSTALLATION_TABLE = true
+
 const apiKey = import.meta.env.VITE_AMP_API_KEY
 const projectId = import.meta.env.VITE_AMP_PROJECT_ID
+const integration = import.meta.env.VITE_AMP_INTEGRATION
 
 const PARAMS = {
-  integration: 'saviyntSalesforceIntegration',
+  integration,
   provider: 'salesforce',
   consumerRef: 'consumer-test-1',
   groupRef: 'group-test-1',
@@ -47,6 +52,15 @@ function InstallIntegration() {
             }}
           />
         </div>
+      </CenteredContainer>
+    )
+  }
+
+  // show installation table if connection is established
+  if (connection && SHOW_INSTALLATION_TABLE) {
+    return (
+      <CenteredContainer>
+        <FieldMappingTable />
       </CenteredContainer>
     )
   }

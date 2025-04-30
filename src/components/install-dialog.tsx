@@ -1,6 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog'
 import { Installation } from '@amp-labs/react'
-
 interface InstallDialogProps {
   isOpen: boolean
   onClose: () => void
@@ -12,7 +11,7 @@ interface InstallDialogProps {
 export function InstallDialog({ isOpen, onClose, connectionId, provider, installation }: InstallDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[1200px]">
         <DialogHeader>
           <DialogTitle>Integration Status</DialogTitle>
           <DialogDescription>
@@ -37,9 +36,7 @@ export function InstallDialog({ isOpen, onClose, connectionId, provider, install
           )}
           {!installation && (
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">
-                No installation found.
-              </p>
+              No installation found
             </div>
           )}
         </div>
