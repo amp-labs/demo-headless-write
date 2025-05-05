@@ -11,14 +11,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-import { useManifest, useCreateInstallation, ConfigContent, useInstallation } from "@amp-labs/react";
+import { useManifest, useCreateInstallation, useInstallation } from "@amp-labs/react";
+import { createInstallationConfig } from "@/lib/installation";
 
 // ----------------------------------
 // Types & Mock Data
 // ----------------------------------
 export type MappingDirection = "readAndWrite" | "read";
 
-  // Helpers for rendering icons
+// Helpers for rendering icons
 const renderDirectionIcon = (dir: MappingDirection) => {
   switch (dir) {
     case "readAndWrite":
@@ -28,7 +29,7 @@ const renderDirectionIcon = (dir: MappingDirection) => {
   }
 };
 
-interface FieldMapping {
+export interface FieldMapping {
   id: string;
   dynamicField: string;
   direction: MappingDirection;
@@ -98,45 +99,8 @@ export function FieldMappingTable() {
 
   
   const handleCreateInstallation = async () => {
-
-    if (!manifest) throw new Error("Manifest not found")
-
-    // form config object
-    const config: ConfigContent = { 
-      provider: manifest?.content?.provider,
-      read: { objects: {} },
-    };
-
-    // transform mappings into selectedFieldMappings
-    const selectedFieldMappings: { [key: string]: string } = {}
-    mappings.forEach((mapping) => {
-      selectedFieldMappings[mapping.dynamicField] = mapping.salesforceField;
-    });
-
-    // add required fields to selectedFields
-    const selectedFields: { [key: string]: boolean } = {};
-    selectedObject?.requiredFields?.forEach((field) => {
-      if ('fieldName' in field) {
-        selectedFields[field.fieldName] = true;
-      }
-    });
-
-    if (!config.read) {
-      config.read = { objects: {} };
-    }
-
-    if (selectedObject) {
-      config.read.objects = {
-        [selectedObject.objectName]: {
-          objectName: selectedObject.objectName,
-          schedule: selectedObject.schedule,
-          destination: selectedObject.destination,
-          selectedFields: selectedFields,
-          selectedFieldMappings: selectedFieldMappings,
-        },
-      };
-    }
-
+    if (!manifest) throw new Error("Manifest not found");
+    const config = createInstallationConfig({ manifest, mappings, selectedObject });
     const installation = createInstallation(config);
     console.log('Installation created', installation);
   };
@@ -147,7 +111,7 @@ export function FieldMappingTable() {
     <section className="space-y-4 max-w-screen-lg mx-auto">
       <h2 className="text-lg font-semibold">Salesforce fields</h2>
       <p className="text-sm text-muted-foreground">
-        Name, Email, Title, and Owner are required fields and can’t be removed. You can map additional custom fields
+        Name, Email, Title, and Owner are required fields and can't be removed. You can map additional custom fields
         below.
       </p>
 
