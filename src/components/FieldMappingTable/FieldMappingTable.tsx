@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -11,7 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-import { useManifest } from "@amp-labs/react";
+import { useManifest, useCreateInstallation, ConfigContent, useInstallation } from "@amp-labs/react";
 
 // ----------------------------------
 // Types & Mock Data
@@ -84,10 +84,64 @@ export function FieldMappingTable() {
   const [mappings, setMappings] = useState<FieldMapping[]>(INITIAL_MAPPINGS);
 
   const { getCustomerFieldsMetadataForObject, data: manifest } = useManifest();
-  const firstObject = manifest?.content?.read?.objects?.[0];
-  const metadata = firstObject && getCustomerFieldsMetadataForObject(firstObject.objectName);
+  const selectedObject = manifest?.content?.read?.objects?.[0];
+  const metadata = selectedObject && getCustomerFieldsMetadataForObject(selectedObject.objectName);
   const allFields = metadata?.allFieldsMetaData; // provider fields with metadata
   const allFieldsArray = allFields ? Object.values(allFields) : []; // convert to array for mapping inputs
+
+  const { createInstallation, isPending } = useCreateInstallation();
+  const { installation } = useInstallation();
+
+  useEffect(() => {
+    console.log('Installation created', {installation});
+  }, [installation]);
+
+  
+  const handleCreateInstallation = async () => {
+
+    if (!manifest) throw new Error("Manifest not found")
+
+    // form config object
+    const config: ConfigContent = { 
+      provider: manifest?.content?.provider,
+      read: { objects: {} },
+    };
+
+    // transform mappings into selectedFieldMappings
+    const selectedFieldMappings: { [key: string]: string } = {}
+    mappings.forEach((mapping) => {
+      selectedFieldMappings[mapping.dynamicField] = mapping.salesforceField;
+    });
+
+    // add required fields to selectedFields
+    const selectedFields: { [key: string]: boolean } = {};
+    selectedObject?.requiredFields?.forEach((field) => {
+      if ('fieldName' in field) {
+        selectedFields[field.fieldName] = true;
+      }
+    });
+
+    if (!config.read) {
+      config.read = { objects: {} };
+    }
+
+    if (selectedObject) {
+      config.read.objects = {
+        [selectedObject.objectName]: {
+          objectName: selectedObject.objectName,
+          schedule: selectedObject.schedule,
+          destination: selectedObject.destination,
+          selectedFields: selectedFields,
+          selectedFieldMappings: selectedFieldMappings,
+        },
+      };
+    }
+
+    const installation = createInstallation(config);
+    console.log('Installation created', installation);
+  };
+
+
 
   return (
     <section className="space-y-4 max-w-screen-lg mx-auto">
@@ -219,8 +273,9 @@ export function FieldMappingTable() {
         </CardContent>
       </Card>
 
-      <Button className="w-full" onClick={() => {
+      <Button className="w-full" disabled={isPending} onClick={() => {
         console.log('Create installation from mappings', {mappings})
+        handleCreateInstallation();
       }}>Install</Button>
     </section>
   );
