@@ -1,4 +1,5 @@
 import {
+  useConfig,
   useCreateInstallation,
   useInstallation,
   useManifest,
@@ -22,7 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { createInstallationConfig } from "@/lib/installation";
+// import { createInstallationConfig } from "@/lib/installation";
 
 // ----------------------------------
 // Types & Mock Data
@@ -103,22 +104,42 @@ export function FieldMappingTable() {
   const allFields = metadata?.allFieldsMetaData; // provider fields with metadata
   const allFieldsArray = allFields ? Object.values(allFields) : []; // convert to array for mapping inputs
 
-  const { createInstallation, isPending } = useCreateInstallation();
+  const { isPending } = useCreateInstallation();
   const { installation } = useInstallation();
+  const config = useConfig();
 
   useEffect(() => {
     console.log("Installation created", { installation });
   }, [installation]);
 
   const handleCreateInstallation = async () => {
-    if (!manifest) throw new Error("Manifest not found");
-    const config = createInstallationConfig({
-      manifest,
-      mappings,
-      selectedObject,
+    // Option 1: utilize the useConfig hook to create the installation config object
+    if (!selectedObject) throw new Error("Selected object not found");
+    // transform the mappings into a config object
+    // for each mappings from the local state
+    mappings.forEach((mapping) => {
+      // set the field mapping for the selected object
+      config.readObject(selectedObject?.objectName).setFieldMapping({
+        fieldName: mapping.salesforceField,
+        mapToName: mapping.dynamicField,
+      });
+
+      // todo: set the write selected object
+
+      // todo: set the default value for the selected object
     });
-    const installation = createInstallation(config);
-    console.log("Installation created", installation);
+
+    console.log("Installation config", config.draft);
+
+    // Option 2: manually create the config object
+    // if (!manifest) throw new Error("Manifest not found");
+    // const config = createInstallationConfig({
+    //   manifest,
+    //   mappings,
+    //   selectedObject,
+    // });
+    // const installation = createInstallation(config);
+    // console.log("Installation created", installation);
   };
 
   return (
