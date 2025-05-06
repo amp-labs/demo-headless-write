@@ -1,16 +1,11 @@
-import type { ConfigContent, } from "@amp-labs/react";
+import type { ConfigContent, HydratedIntegrationField,HydratedIntegrationObject, HydratedRevision } from "@amp-labs/react";
 
 import type { FieldMapping } from "@/components/FieldMappingTable/FieldMappingTable";
 
 interface CreateInstallationParams {
-    manifest: any; // TODO: Add proper manifest type
+    manifest: HydratedRevision;
     mappings: FieldMapping[];
-    selectedObject: any; // TODO: Add proper object type
-}
-
-interface RequiredField {
-    fieldName: string;
-    [key: string]: any;
+    selectedObject: HydratedIntegrationObject;
 }
 
 // Manual create installation
@@ -31,7 +26,7 @@ export function createInstallationConfig({ manifest, mappings, selectedObject }:
 
     // add required fields to selectedFields
     const selectedFields: { [key: string]: boolean } = {};
-    selectedObject?.requiredFields?.forEach((field: RequiredField) => {
+    selectedObject?.requiredFields?.forEach((field: HydratedIntegrationField) => {
         if ('fieldName' in field) {
             selectedFields[field.fieldName] = true;
         }
