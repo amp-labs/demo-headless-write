@@ -1,16 +1,17 @@
-import type { ConfigContent, HydratedIntegrationField,HydratedIntegrationObject, HydratedRevision } from "@amp-labs/react";
+import type { ConfigContent, HydratedIntegrationField, HydratedIntegrationObject, HydratedRevision } from "@amp-labs/react";
 
 import type { FieldMapping } from "@/components/FieldMappingTable/FieldMappingTable";
 
 interface CreateInstallationParams {
     manifest: HydratedRevision;
     mappings: FieldMapping[];
-    selectedObject: HydratedIntegrationObject;
+    selectedObject?: HydratedIntegrationObject;
 }
 
 // Manual create installation
 export function createInstallationConfig({ manifest, mappings, selectedObject }: CreateInstallationParams): ConfigContent {
     if (!manifest) throw new Error("Manifest not found");
+    if (!selectedObject) throw new Error("Selected object not found");
 
     // form config object
     const config: ConfigContent = {
