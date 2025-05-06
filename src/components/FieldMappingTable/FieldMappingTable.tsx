@@ -1,9 +1,19 @@
-import { useCreateInstallation, useInstallation,useManifest } from "@amp-labs/react";
-import { useEffect,useState } from "react";
+import {
+  useCreateInstallation,
+  useInstallation,
+  useManifest,
+} from "@amp-labs/react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -64,18 +74,19 @@ const INITIAL_MAPPINGS: FieldMapping[] = [
   },
 ];
 
-const DYNAMIC_FIELDS = [{
-  label: "Billing Country", 
-  value: "billingCountry",
-},
-{
-  label: "Billing State/Province",
-  value: "billingState",
-},
-{
-  label: "Billing Zip/Postal Code",
-  value: "billingZip",
-},
+const DYNAMIC_FIELDS = [
+  {
+    label: "Billing Country",
+    value: "billingCountry",
+  },
+  {
+    label: "Billing State/Province",
+    value: "billingState",
+  },
+  {
+    label: "Billing Zip/Postal Code",
+    value: "billingZip",
+  },
 ];
 
 // ----------------------------------
@@ -86,7 +97,9 @@ export function FieldMappingTable() {
 
   const { getCustomerFieldsMetadataForObject, data: manifest } = useManifest();
   const selectedObject = manifest?.content?.read?.objects?.[0];
-  const metadata = selectedObject && getCustomerFieldsMetadataForObject(selectedObject.objectName);
+  const metadata =
+    selectedObject &&
+    getCustomerFieldsMetadataForObject(selectedObject.objectName);
   const allFields = metadata?.allFieldsMetaData; // provider fields with metadata
   const allFieldsArray = allFields ? Object.values(allFields) : []; // convert to array for mapping inputs
 
@@ -94,25 +107,26 @@ export function FieldMappingTable() {
   const { installation } = useInstallation();
 
   useEffect(() => {
-    console.log('Installation created', {installation});
+    console.log("Installation created", { installation });
   }, [installation]);
 
-  
   const handleCreateInstallation = async () => {
     if (!manifest) throw new Error("Manifest not found");
-    const config = createInstallationConfig({ manifest, mappings, selectedObject });
+    const config = createInstallationConfig({
+      manifest,
+      mappings,
+      selectedObject,
+    });
     const installation = createInstallation(config);
-    console.log('Installation created', installation);
+    console.log("Installation created", installation);
   };
-
-
 
   return (
     <section className="space-y-4 max-w-screen-lg mx-auto">
       <h2 className="text-lg font-semibold">Salesforce fields</h2>
       <p className="text-sm text-muted-foreground">
-        Name, Email, Title, and Owner are required fields and can't be removed. You can map additional custom fields
-        below.
+        Name, Email, Title, and Owner are required fields and can't be removed.
+        You can map additional custom fields below.
       </p>
 
       <Card>
@@ -120,9 +134,13 @@ export function FieldMappingTable() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-1/4 items-center gap-2">DYNAMIC FIELDS</TableHead>
+                <TableHead className="w-1/4 items-center gap-2">
+                  DYNAMIC FIELDS
+                </TableHead>
                 <TableHead className="w-[60px]" />
-                <TableHead className="w-1/4 items-center gap-2">SALESFORCE FIELDS</TableHead>
+                <TableHead className="w-1/4 items-center gap-2">
+                  SALESFORCE FIELDS
+                </TableHead>
                 {/* <TableHead className="w-1/5 items-center">
                   DEFAULT VALUE                  
                 </TableHead>
@@ -141,7 +159,9 @@ export function FieldMappingTable() {
                       value={row.dynamicField}
                       onValueChange={(value) =>
                         setMappings((prev) =>
-                          prev.map((m) => (m.id === row.id ? { ...m, dynamicField: value } : m))
+                          prev.map((m) =>
+                            m.id === row.id ? { ...m, dynamicField: value } : m
+                          )
                         )
                       }
                     >
@@ -169,12 +189,19 @@ export function FieldMappingTable() {
                       value={row.salesforceField}
                       onValueChange={(value) =>
                         setMappings((prev) =>
-                          prev.map((m) => (m.id === row.id ? { 
-                            ...m, 
-                            salesforceField: value, 
-                            // if field is read-only, set direction to read
-                            direction: metadata?.getField(value)?.readOnly === true ? "read" : "readAndWrite"
-                          } : m))
+                          prev.map((m) =>
+                            m.id === row.id
+                              ? {
+                                  ...m,
+                                  salesforceField: value,
+                                  // if field is read-only, set direction to read
+                                  direction:
+                                    metadata?.getField(value)?.readOnly === true
+                                      ? "read"
+                                      : "readAndWrite",
+                                }
+                              : m
+                          )
                         )
                       }
                     >
@@ -237,10 +264,16 @@ export function FieldMappingTable() {
         </CardContent>
       </Card>
 
-      <Button className="w-full" disabled={isPending} onClick={() => {
-        console.log('Create installation from mappings', {mappings})
-        handleCreateInstallation();
-      }}>Install</Button>
+      <Button
+        className="w-full"
+        disabled={isPending}
+        onClick={() => {
+          console.log("Create installation from mappings", { mappings });
+          handleCreateInstallation();
+        }}
+      >
+        Install
+      </Button>
     </section>
   );
 }
