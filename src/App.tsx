@@ -1,13 +1,12 @@
-import { useState } from 'react'
-
-import { ConnectProvider, AmpersandProvider,  InstallationProvider, useConnection, useInstallation } from '@amp-labs/react'
 import '@amp-labs/react/styles'; // Import the styles for the Ampersand SDK (ConnectProvider
 
-import { InstallDialog } from './components/install-dialog'
-import { CenteredContainer } from './components/ui/centered-container'
-import { Button } from './components/ui/button'
+import { AmpersandProvider,  ConnectProvider, InstallationProvider, useConnection, useInstallation } from '@amp-labs/react'
+import { useState } from 'react'
 
 import { FieldMappingTable } from './components/FieldMappingTable/FieldMappingTable';
+import { InstallDialog } from './components/install-dialog'
+import { Button } from './components/ui/button'
+import { CenteredContainer } from './components/ui/centered-container'
 
 const SHOW_INSTALLATION_TABLE = true
 

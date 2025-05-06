@@ -1,4 +1,9 @@
-import { useState, useEffect } from "react";
+import { useCreateInstallation, useInstallation,useManifest } from "@amp-labs/react";
+import { useEffect,useState } from "react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -7,11 +12,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-import { useManifest, useCreateInstallation, useInstallation } from "@amp-labs/react";
 import { createInstallationConfig } from "@/lib/installation";
 
 // ----------------------------------

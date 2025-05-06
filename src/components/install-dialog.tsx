@@ -1,5 +1,6 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog'
-import { Installation } from '@amp-labs/react'
+import type { Installation } from '@amp-labs/react'
+
+import { Dialog, DialogContent, DialogDescription,DialogHeader, DialogTitle } from './ui/dialog'
 interface InstallDialogProps {
   isOpen: boolean
   onClose: () => void
