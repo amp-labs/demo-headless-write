@@ -1,4 +1,7 @@
 import {
+  ConfigContent,
+  FieldSettingWriteOnCreateEnum,
+  FieldSettingWriteOnUpdateEnum,
   useConfig,
   useCreateInstallation,
   useInstallation,
@@ -8,6 +11,7 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -104,13 +108,22 @@ export function FieldMappingTable() {
   const allFields = metadata?.allFieldsMetaData; // provider fields with metadata
   const allFieldsArray = allFields ? Object.values(allFields) : []; // convert to array for mapping inputs
 
-  const { isPending } = useCreateInstallation();
+  const { isPending, createInstallation } = useCreateInstallation();
   const { installation } = useInstallation();
   const config = useConfig();
+
+  const [pendingSubmit, setPendingSubmit] = useState(false);
 
   useEffect(() => {
     console.log("Installation created", { installation });
   }, [installation]);
+
+  useEffect(() => {
+    if (!pendingSubmit) return;
+    setPendingSubmit(false); // reset flag
+    console.log("Installation config", config.draft);
+    // createInstallation(config.draft as ConfigContent);
+  }, [pendingSubmit, config.draft]);
 
   const handleCreateInstallation = async () => {
     // Option 1: utilize the useConfig hook to create the installation config object
@@ -125,11 +138,36 @@ export function FieldMappingTable() {
       });
 
       // todo: set the write selected object
-
-      // todo: set the default value for the selected object
+      // if (mapping.direction === "readAndWrite") {
+      config.writeObject(selectedObject?.objectName).setEnableWrite();
+      // set advanced write settings
+      config.writeObject(selectedObject?.objectName).setSelectedFieldSettings({
+        fieldName: mapping.salesforceField,
+        settings: {
+          _default: {
+            // map your default value to the correct field setting
+            stringValue: mapping.defaultValue,
+          },
+          // map your update mode to the correct advanced field setting
+          writeOnUpdate:
+            mapping.updateMode === "Overwrite"
+              ? FieldSettingWriteOnUpdateEnum.Always
+              : FieldSettingWriteOnUpdateEnum.Never,
+          writeOnCreate:
+            // map your update mode to the correct advanced field setting
+            mapping.updateMode === "Auto-fill"
+              ? FieldSettingWriteOnCreateEnum.Always
+              : FieldSettingWriteOnCreateEnum.Never,
+        },
+      });
+      // } else {
+      //   config.writeObject(selectedObject?.objectName).setDisableWrite();
+      // }
     });
 
-    console.log("Installation config", config.draft);
+    setPendingSubmit(true);
+
+    // console.log("Installation config", config.get());
 
     // Option 2: manually create the config object
     // if (!manifest) throw new Error("Manifest not found");
@@ -162,12 +200,12 @@ export function FieldMappingTable() {
                 <TableHead className="w-1/4 items-center gap-2">
                   SALESFORCE FIELDS
                 </TableHead>
-                {/* <TableHead className="w-1/5 items-center">
-                  DEFAULT VALUE                  
+                <TableHead className="w-1/5 items-center">
+                  DEFAULT VALUE
                 </TableHead>
                 <TableHead className="w-1/5 items-center">
-                  FIELDS UPDATE 
-                </TableHead> */}
+                  FIELDS UPDATE
+                </TableHead>
               </TableRow>
             </TableHeader>
 
@@ -240,25 +278,37 @@ export function FieldMappingTable() {
                   </TableCell>
 
                   {/* Default value */}
-                  {/* <TableCell className="w-1/5">
+                  <TableCell className="w-1/5">
                     <Input
                       placeholder="Value"
                       value={row.defaultValue ?? ""}
                       onChange={(e) =>
                         setMappings((prev) =>
-                          prev.map((m) => (m.id === row.id ? { ...m, defaultValue: e.target.value } : m))
+                          prev.map((m) =>
+                            m.id === row.id
+                              ? { ...m, defaultValue: e.target.value }
+                              : m
+                          )
                         )
                       }
                     />
-                  </TableCell> */}
+                  </TableCell>
 
                   {/* Update mode */}
-                  {/* <TableCell className="w-1/5">
+                  <TableCell className="w-1/5">
                     <Select
                       value={row.updateMode}
                       onValueChange={(value) =>
                         setMappings((prev) =>
-                          prev.map((m) => (m.id === row.id ? { ...m, updateMode: value as FieldMapping["updateMode"] } : m))
+                          prev.map((m) =>
+                            m.id === row.id
+                              ? {
+                                  ...m,
+                                  updateMode:
+                                    value as FieldMapping["updateMode"],
+                                }
+                              : m
+                          )
                         )
                       }
                     >
@@ -266,18 +316,14 @@ export function FieldMappingTable() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {[
-                          "Auto-fill",
-                          "Overwrite",
-                          "Skip",
-                        ].map((mode) => (
+                        {["Auto-fill", "Overwrite", "Skip"].map((mode) => (
                           <SelectItem key={mode} value={mode}>
                             {mode}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                  </TableCell> */}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
