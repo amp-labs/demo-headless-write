@@ -1,4 +1,86 @@
-# React + TypeScript + Vite
+# Field Mapping Integration App
+
+A React TypeScript application that demonstrates the @amp-labs/react headless library. The app allows users to map dynamic fields to Salesforce fields, configure field update modes, and manage installations.
+
+## Features
+
+- Map dynamic fields to provider (i.e. Salesforce/Hubspot) fields
+- Handle read and write permissions for fields
+- Configure field update modes (advanced write features)
+- Set default values for fields (advanced write)
+- Create and manage installations with configuration management
+
+## Tech Stack
+
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- Shadcn UI Components
+- Ampersand Headless (@amp-labs/react)
+
+## Setup Requirements
+
+### 1. Environment Variables
+
+Create a `.env` file with the following variables:
+
+```
+VITE_AMP_PROJECT_ID=your_project_id
+VITE_AMP_API_KEY=your_api_key
+VITE_AMP_INTEGRATION=your_integration_id
+```
+
+### 2. Dependencies Installation
+
+```bash
+yarn install
+```
+
+### 3. Development
+
+```bash
+yarn dev
+```
+
+### 4. Build
+
+```bash
+yarn build
+```
+
+## Project Structure
+
+```
+src/
+├── components/
+│   ├── FieldMappingTable/
+│   │   └── FieldMappingTable.tsx    # Main field mapping component
+│   ├── ui/                          # Shadcn UI components
+│   └── install-dialog.tsx           # Installation dialog
+├── lib/
+│   └── utils.ts                     # Utility functions
+└── App.tsx                          # Main application component
+```
+
+## Development Requirements
+
+- Node.js (latest LTS version recommended)
+- Yarn package manager
+- Modern web browser
+- Access to Ampersand Labs API credentials
+
+## Additional Notes
+
+- The app uses Shadcn UI for the component library
+- Tailwind CSS for styling
+- ESLint for code quality
+- TypeScript for type safety
+- Vite for build tooling and development server
+
+---
+
+##### Generated via Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
@@ -24,31 +106,31 @@ export default tseslint.config({
   languageOptions: {
     // other options...
     parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
+      project: ["./tsconfig.node.json", "./tsconfig.app.json"],
       tsconfigRootDir: import.meta.dirname,
     },
   },
-})
+});
 ```
 
 You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
 ```js
 // eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+import reactX from "eslint-plugin-react-x";
+import reactDom from "eslint-plugin-react-dom";
 
 export default tseslint.config({
   plugins: {
     // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
+    "react-x": reactX,
+    "react-dom": reactDom,
   },
   rules: {
     // other rules...
     // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
+    ...reactX.configs["recommended-typescript"].rules,
     ...reactDom.configs.recommended.rules,
   },
-})
+});
 ```
