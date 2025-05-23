@@ -1,11 +1,11 @@
 import {
   ConfigContent,
-  FieldSettingWriteOnCreateEnum,
   FieldSettingWriteOnUpdateEnum,
   useConfig,
   useCreateInstallation,
   useInstallation,
   useManifest,
+  useUpdateInstallation,
 } from "@amp-labs/react";
 import { useEffect, useState } from "react";
 
@@ -27,7 +27,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-// import { createInstallationConfig } from "@/lib/installation";
 
 // ----------------------------------
 // Types & Mock Data
@@ -44,13 +43,15 @@ const renderDirectionIcon = (dir: MappingDirection) => {
   }
 };
 
+type UpdateMode = "Overwrite" | "Skip";
+
 export interface FieldMapping {
   id: string;
   dynamicField: string;
   direction: MappingDirection;
   salesforceField: string;
   defaultValue?: string;
-  updateMode: "Auto-fill" | "Overwrite" | "Skip";
+  updateMode: UpdateMode;
 }
 
 const INITIAL_MAPPINGS: FieldMapping[] = [
@@ -60,14 +61,14 @@ const INITIAL_MAPPINGS: FieldMapping[] = [
     direction: "readAndWrite",
     salesforceField: "",
     defaultValue: "",
-    updateMode: "Auto-fill",
+    updateMode: "Overwrite",
   },
   {
     id: "2",
     dynamicField: "billingState",
     direction: "read",
     salesforceField: "",
-    updateMode: "Auto-fill",
+    updateMode: "Overwrite",
   },
   {
     id: "3",
@@ -75,7 +76,7 @@ const INITIAL_MAPPINGS: FieldMapping[] = [
     direction: "readAndWrite",
     salesforceField: "",
     defaultValue: "",
-    updateMode: "Overwrite",
+    updateMode: "Skip",
   },
 ];
 
@@ -101,28 +102,88 @@ export function FieldMappingTable() {
   const [mappings, setMappings] = useState<FieldMapping[]>(INITIAL_MAPPINGS);
 
   const { getCustomerFieldsMetadataForObject, data: manifest } = useManifest();
-  const selectedObject = manifest?.content?.read?.objects?.[0];
+  const selectedObject = manifest?.content?.read?.objects?.[0]; // set the objectname based on tab
   const metadata =
     selectedObject &&
     getCustomerFieldsMetadataForObject(selectedObject.objectName);
   const allFields = metadata?.allFieldsMetaData; // provider fields with metadata
   const allFieldsArray = allFields ? Object.values(allFields) : []; // convert to array for mapping inputs
 
-  const { isPending, createInstallation } = useCreateInstallation();
+  const { isPending: isCreating, createInstallation } = useCreateInstallation();
+  const { isPending: isUpdating, updateInstallation } = useUpdateInstallation();
   const { installation } = useInstallation();
   const config = useConfig();
+
+  const { isSyncing } = config;
 
   const [pendingSubmit, setPendingSubmit] = useState(false);
 
   useEffect(() => {
-    console.log("Installation created", { installation });
-  }, [installation]);
+    console.log("Installation config", config.draft);
+
+    if (!selectedObject || !config.draft) return;
+    const readObject = config.readObject(selectedObject?.objectName);
+    const writeObject = config.writeObject(selectedObject?.objectName);
+    console.log("Write object", writeObject);
+    const fieldMappings = DYNAMIC_FIELDS.map((field, index) => {
+      const salesforceField = readObject?.getFieldMapping(field.value) || "";
+
+      // const fieldSettings = writeObject?.getSelectedFieldSettings(field.value);
+      const defaultValues = writeObject?.getDefaultValues(salesforceField);
+      const writeOnUpdateSetting =
+        writeObject?.getWriteOnUpdateSetting(salesforceField);
+      console.log("Default values", defaultValues);
+      console.log("writeOnUpdateSetting", writeOnUpdateSetting);
+
+      return {
+        id: index.toString(),
+        dynamicField: field.value,
+        direction: (readObject &&
+        writeObject?.getWriteObject()?.objectName === selectedObject?.objectName
+          ? "readAndWrite"
+          : "read") as MappingDirection,
+        salesforceField: salesforceField,
+        defaultValue: defaultValues?.stringValue,
+        updateMode: (writeOnUpdateSetting ===
+        FieldSettingWriteOnUpdateEnum.Always
+          ? "Overwrite"
+          : "Skip") as FieldMapping["updateMode"],
+      };
+    });
+    console.log("Field mappings synced from config", fieldMappings);
+    // sort the mappings by id and set the local state
+    setMappings(fieldMappings.sort((a, b) => a.id.localeCompare(b.id)));
+  }, [selectedObject, config.draft]);
 
   useEffect(() => {
     if (!pendingSubmit) return;
     setPendingSubmit(false); // reset flag
     console.log("Installation config", config.draft);
-    // createInstallation(config.draft as ConfigContent);
+    if (installation) {
+      console.log("Updating installation. ", {
+        prevInstallation: installation,
+        config: config.draft as ConfigContent,
+      });
+      updateInstallation({
+        config: config.draft as ConfigContent,
+        onSuccess: (data) => {
+          console.log("Installation updated", { installation: data });
+        },
+        onError: (error) => {
+          console.error("Installation update failed", { error });
+        },
+      });
+    } else {
+      createInstallation({
+        config: config.draft as ConfigContent,
+        onSuccess: (data) => {
+          console.log("Installation created", { installation: data });
+        },
+        onError: (error) => {
+          console.error("Installation creation failed", { error });
+        },
+      });
+    }
   }, [pendingSubmit, config.draft]);
 
   const handleCreateInstallation = async () => {
@@ -153,11 +214,11 @@ export function FieldMappingTable() {
             mapping.updateMode === "Overwrite"
               ? FieldSettingWriteOnUpdateEnum.Always
               : FieldSettingWriteOnUpdateEnum.Never,
-          writeOnCreate:
-            // map your update mode to the correct advanced field setting
-            mapping.updateMode === "Auto-fill"
-              ? FieldSettingWriteOnCreateEnum.Always
-              : FieldSettingWriteOnCreateEnum.Never,
+          // writeOnCreate:
+          //   // map your update mode to the correct advanced field setting
+          //   mapping.updateMode === "Auto-fill"
+          //     ? FieldSettingWriteOnCreateEnum.Always
+          //     : FieldSettingWriteOnCreateEnum.Never,
         },
       });
       // } else {
@@ -316,7 +377,7 @@ export function FieldMappingTable() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {["Auto-fill", "Overwrite", "Skip"].map((mode) => (
+                        {["Overwrite", "Skip"].map((mode) => (
                           <SelectItem key={mode} value={mode}>
                             {mode}
                           </SelectItem>
@@ -333,7 +394,7 @@ export function FieldMappingTable() {
 
       <Button
         className="w-full"
-        disabled={isPending}
+        disabled={isCreating || isUpdating || isSyncing}
         onClick={() => {
           console.log("Create installation from mappings", { mappings });
           handleCreateInstallation();
