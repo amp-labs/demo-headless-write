@@ -3,6 +3,7 @@ import {
   FieldSettingWriteOnUpdateEnum,
   useConfig,
   useCreateInstallation,
+  useDeleteInstallation,
   useInstallation,
   useManifest,
   useUpdateInstallation,
@@ -27,6 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
 // ----------------------------------
 // Types & Mock Data
@@ -112,15 +114,26 @@ export function FieldMappingTable() {
   const { isPending: isCreating, createInstallation } = useCreateInstallation();
   const { isPending: isUpdating, updateInstallation } = useUpdateInstallation();
   const { installation } = useInstallation();
+  const { isPending: isDeleting, deleteInstallation } = useDeleteInstallation();
   const config = useConfig();
 
-  const { isSyncing } = config;
+  const { isSyncing, syncInstallationConfig } = config;
 
   const [pendingSubmit, setPendingSubmit] = useState(false);
 
   useEffect(() => {
     console.log("Installation config", config.draft);
+    // sync config to local state whenever draft changes
+    syncConfigToLocalState();
+  }, [selectedObject, config.draft]);
 
+  useEffect(() => {
+    if (!pendingSubmit) return;
+    setPendingSubmit(false); // reset flag
+    handleMutateInstallation();
+  }, [pendingSubmit, config.draft]);
+
+  const syncConfigToLocalState = () => {
     if (!selectedObject || !config.draft) return;
     const readObject = config.readObject(selectedObject?.objectName);
     const writeObject = config.writeObject(selectedObject?.objectName);
@@ -150,20 +163,12 @@ export function FieldMappingTable() {
           : "Skip") as FieldMapping["updateMode"],
       };
     });
-    console.log("Field mappings synced from config", fieldMappings);
     // sort the mappings by id and set the local state
     setMappings(fieldMappings.sort((a, b) => a.id.localeCompare(b.id)));
-  }, [selectedObject, config.draft]);
+  };
 
-  useEffect(() => {
-    if (!pendingSubmit) return;
-    setPendingSubmit(false); // reset flag
-    console.log("Installation config", config.draft);
+  const handleMutateInstallation = async () => {
     if (installation) {
-      console.log("Updating installation. ", {
-        prevInstallation: installation,
-        config: config.draft as ConfigContent,
-      });
       updateInstallation({
         config: config.draft as ConfigContent,
         onSuccess: (data) => {
@@ -184,7 +189,7 @@ export function FieldMappingTable() {
         },
       });
     }
-  }, [pendingSubmit, config.draft]);
+  };
 
   const handleCreateInstallation = async () => {
     // Option 1: utilize the useConfig hook to create the installation config object
@@ -228,8 +233,6 @@ export function FieldMappingTable() {
 
     setPendingSubmit(true);
 
-    // console.log("Installation config", config.get());
-
     // Option 2: manually create the config object
     // if (!manifest) throw new Error("Manifest not found");
     // const config = createInstallationConfig({
@@ -240,6 +243,8 @@ export function FieldMappingTable() {
     // const installation = createInstallation(config);
     // console.log("Installation created", installation);
   };
+
+  const isLoading = isCreating || isUpdating || isSyncing || isDeleting;
 
   return (
     <section className="space-y-4 max-w-screen-lg mx-auto">
@@ -277,6 +282,7 @@ export function FieldMappingTable() {
                   <TableCell className="w-1/4">
                     <Select
                       value={row.dynamicField}
+                      disabled={isLoading}
                       onValueChange={(value) =>
                         setMappings((prev) =>
                           prev.map((m) =>
@@ -285,7 +291,12 @@ export function FieldMappingTable() {
                         )
                       }
                     >
-                      <SelectTrigger>
+                      <SelectTrigger
+                        className={cn(
+                          "w-full",
+                          isLoading && "opacity-50 cursor-not-allowed"
+                        )}
+                      >
                         <SelectValue placeholder="Select field" />
                       </SelectTrigger>
                       <SelectContent>
@@ -307,6 +318,7 @@ export function FieldMappingTable() {
                   <TableCell className="w-1/4">
                     <Select
                       value={row.salesforceField}
+                      disabled={isLoading}
                       onValueChange={(value) =>
                         setMappings((prev) =>
                           prev.map((m) =>
@@ -314,18 +326,22 @@ export function FieldMappingTable() {
                               ? {
                                   ...m,
                                   salesforceField: value,
-                                  // if field is read-only, set direction to read
                                   direction:
                                     metadata?.getField(value)?.readOnly === true
-                                      ? "read"
-                                      : "readAndWrite",
+                                      ? ("read" as MappingDirection)
+                                      : ("readAndWrite" as MappingDirection),
                                 }
                               : m
                           )
                         )
                       }
                     >
-                      <SelectTrigger>
+                      <SelectTrigger
+                        className={cn(
+                          "w-full",
+                          isLoading && "opacity-50 cursor-not-allowed"
+                        )}
+                      >
                         <SelectValue placeholder="Select a field" />
                       </SelectTrigger>
                       <SelectContent>
@@ -342,6 +358,7 @@ export function FieldMappingTable() {
                   <TableCell className="w-1/5">
                     <Input
                       placeholder="Value"
+                      disabled={isLoading}
                       value={row.defaultValue ?? ""}
                       onChange={(e) =>
                         setMappings((prev) =>
@@ -359,6 +376,7 @@ export function FieldMappingTable() {
                   <TableCell className="w-1/5">
                     <Select
                       value={row.updateMode}
+                      disabled={isLoading}
                       onValueChange={(value) =>
                         setMappings((prev) =>
                           prev.map((m) =>
@@ -373,7 +391,12 @@ export function FieldMappingTable() {
                         )
                       }
                     >
-                      <SelectTrigger>
+                      <SelectTrigger
+                        className={cn(
+                          "w-full",
+                          isLoading && "opacity-50 cursor-not-allowed"
+                        )}
+                      >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -391,16 +414,41 @@ export function FieldMappingTable() {
           </Table>
         </CardContent>
       </Card>
-
+      {/* reset to server state */}
       <Button
+        variant="outline"
         className="w-full"
-        disabled={isCreating || isUpdating || isSyncing}
         onClick={() => {
-          console.log("Create installation from mappings", { mappings });
-          handleCreateInstallation();
+          syncInstallationConfig();
+          syncConfigToLocalState();
         }}
       >
+        Reset
+      </Button>
+      <Button
+        className="w-full"
+        disabled={isLoading}
+        onClick={() => handleCreateInstallation()}
+      >
         Install
+      </Button>
+      {/* Delete installation */}
+      <Button
+        variant="destructive"
+        className="w-full"
+        disabled={isDeleting}
+        onClick={() => {
+          deleteInstallation({
+            onSuccess: () => {
+              console.log("Installation deleted");
+            },
+            onError: (error) => {
+              console.error("Installation deletion failed", { error });
+            },
+          });
+        }}
+      >
+        Delete
       </Button>
     </section>
   );
