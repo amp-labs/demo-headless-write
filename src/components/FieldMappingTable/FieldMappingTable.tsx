@@ -99,6 +99,7 @@ export function FieldMappingTable() {
   // Mutation handlers
   // ----------------------------------
   const handleMutateInstallation = async () => {
+    if (!selectedObject) throw new Error("Selected object not found");
     if (installation) {
       updateInstallation({
         config: config.draft as ConfigContent,
@@ -122,17 +123,14 @@ export function FieldMappingTable() {
     }
   };
 
-  const handleCreateInstallation = async () => {
-    if (!selectedObject) throw new Error("Selected object not found");
-    handleMutateInstallation();
-  };
-
   // ----------------------------------
   // Loading state
   // ----------------------------------
-
   const isLoading = isCreating || isUpdating || isSyncing || isDeleting;
 
+  // ----------------------------------
+  // Render UI
+  // ----------------------------------
   return (
     <section className="space-y-4 max-w-screen-lg mx-auto">
       <h2 className="text-lg font-semibold">Salesforce Field Mappings</h2>
@@ -256,10 +254,11 @@ export function FieldMappingTable() {
         >
           Reset
         </Button>
+        {/* Install / Update / Create*/}
         <Button
           className="flex-1"
           disabled={isLoading}
-          onClick={() => handleCreateInstallation()}
+          onClick={() => handleMutateInstallation()}
         >
           Install
         </Button>

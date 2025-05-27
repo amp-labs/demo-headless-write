@@ -5,10 +5,9 @@ A React TypeScript application that demonstrates the @amp-labs/react headless li
 ## Features
 
 - Map dynamic fields to provider (i.e. Salesforce/Hubspot) fields
-- Handle read and write permissions for fields
-- Configure field update modes (advanced write features)
-- Set default values for fields (advanced write)
-- Create and manage installations with configuration management
+- Handle read permissions for fields (config.readObjects)
+- Create and manage installations with configuration management (useConfig)
+- CRUD installation hooks
 
 ## Tech Stack
 
@@ -57,7 +56,6 @@ src/
 │   ├── FieldMappingTable/
 │   │   └── FieldMappingTable.tsx    # Main field mapping component
 │   ├── ui/                          # Shadcn UI components
-│   └── install-dialog.tsx           # Installation dialog
 ├── lib/
 │   └── utils.ts                     # Utility functions
 └── App.tsx                          # Main application component
