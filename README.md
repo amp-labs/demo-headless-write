@@ -1,6 +1,6 @@
 # Headless @amp-labs sample app
 
-A React TypeScript application that demonstrates the @amp-labs/react headless library. The app allows users to map dynamic fields to Salesforce fields, configure field update modes, and manage installations.
+A React TypeScript application that demonstrates the @amp-labs/react headless library. The app allows users to map dynamic fields to Salesforce fields and manage installations.
 
 ## Features
 
