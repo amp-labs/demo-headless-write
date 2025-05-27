@@ -47,7 +47,7 @@ const DYNAMIC_FIELDS = [
 ];
 
 // ----------------------------------
-// Component
+// Custom Component
 // ----------------------------------
 export function FieldMappingTable() {
   // ----------------------------------
