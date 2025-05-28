@@ -1,5 +1,4 @@
 import {
-  ConfigContent,
   useConfig,
   useCreateInstallation,
   useDeleteInstallation,
@@ -93,7 +92,6 @@ export function FieldMappingTable() {
   // Config Read Hook
   // ----------------------------------
   const config = useConfig();
-  const { isSyncing, syncInstallationConfig } = config;
 
   // ----------------------------------
   // Mutation handlers
@@ -102,7 +100,7 @@ export function FieldMappingTable() {
     if (!selectedObject) throw new Error("Selected object not found");
     if (installation) {
       updateInstallation({
-        config: config.draft as ConfigContent,
+        config: config.get(),
         onSuccess: (data) => {
           console.log("Installation updated", { installation: data });
         },
@@ -112,7 +110,7 @@ export function FieldMappingTable() {
       });
     } else {
       createInstallation({
-        config: config.draft as ConfigContent,
+        config: config.get(),
         onSuccess: (data) => {
           console.log("Installation created", { installation: data });
         },
@@ -126,7 +124,7 @@ export function FieldMappingTable() {
   // ----------------------------------
   // Loading state
   // ----------------------------------
-  const isLoading = isCreating || isUpdating || isSyncing || isDeleting;
+  const isLoading = isCreating || isUpdating || isDeleting;
 
   // ----------------------------------
   // Render UI
@@ -250,7 +248,7 @@ export function FieldMappingTable() {
           variant="outline"
           className="flex-1"
           disabled={isLoading}
-          onClick={() => syncInstallationConfig()}
+          onClick={() => config.reset()}
         >
           Reset
         </Button>
