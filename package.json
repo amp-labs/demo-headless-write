@@ -11,7 +11,7 @@
     "lint:fix": "npm run lint -- --fix"
   },
   "dependencies": {
-    "@amp-labs/react": "^2.8.0",
+    "@amp-labs/react": "^2.8.1",
     "@radix-ui/react-dialog": "^1.1.10",
     "@radix-ui/react-select": "^2.2.2",
     "@radix-ui/react-slot": "^1.2.0",
