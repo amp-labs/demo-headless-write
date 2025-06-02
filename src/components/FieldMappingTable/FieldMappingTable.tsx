@@ -52,16 +52,15 @@ export function FieldMappingTable() {
   // ----------------------------------
   // Manifest: Objects & Metadata
   // ----------------------------------
-  const { getCustomerFieldsMetadataForObject, data: manifest } = useManifest();
+  const { getCustomerFieldsForObject, data: manifest } = useManifest();
 
   // Selected object (Builder selected object)
   const selectedObject = manifest?.content?.read?.objects?.[0]; // set the objectname based on tab
 
   // Metadata
   const metadata =
-    selectedObject &&
-    getCustomerFieldsMetadataForObject(selectedObject.objectName);
-  const allFields = metadata?.allFieldsMetaData; // provider fields with metadata
+    selectedObject && getCustomerFieldsForObject(selectedObject.objectName);
+  const allFields = metadata?.allFields; // provider fields with metadata
   const allFieldsArray = allFields ? Object.values(allFields) : []; // convert to array for mapping inputs
 
   // ----------------------------------
