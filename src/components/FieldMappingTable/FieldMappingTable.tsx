@@ -1,4 +1,5 @@
 import {
+  FieldSettingWriteOnUpdateEnum,
   useConfig,
   useCreateInstallation,
   useDeleteInstallation,
@@ -138,14 +139,17 @@ export function FieldMappingTable() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-1/3 items-center gap-2">
+                <TableHead className="w-1/4 items-center gap-2">
                   DYNAMIC FIELDS
                 </TableHead>
-                <TableHead className="w-1/3 items-center gap-2">
+                <TableHead className="w-1/4 items-center gap-2">
                   SALESFORCE FIELDS
                 </TableHead>
-                <TableHead className="w-1/3 items-center gap-2">
+                <TableHead className="w-1/4 items-center gap-2">
                   DEFAULT VALUE
+                </TableHead>
+                <TableHead className="w-1/4 items-center gap-2">
+                  OVERRIDE WRITE
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -154,7 +158,7 @@ export function FieldMappingTable() {
               {DYNAMIC_FIELDS.map((row) => (
                 <TableRow key={row.value} className="hover:bg-muted/20">
                   {/* Dynamic field */}
-                  <TableCell className="w-1/3">
+                  <TableCell className="w-1/4">
                     <Select value={row.value} disabled={true}>
                       <SelectTrigger
                         className={cn(
@@ -175,7 +179,7 @@ export function FieldMappingTable() {
                   </TableCell>
 
                   {/* Salesforce field */}
-                  <TableCell className="w-1/3">
+                  <TableCell className="w-1/4">
                     <Select
                       value={
                         selectedObject &&
@@ -214,7 +218,8 @@ export function FieldMappingTable() {
                   </TableCell>
 
                   {/* Default value - advanced write feature */}
-                  <TableCell className="w-1/3">
+                  {/* https://docs.withampersand.com/write-actions#default-values */}
+                  <TableCell className="w-1/4">
                     <Input
                       type="text"
                       className={cn(
@@ -241,6 +246,48 @@ export function FieldMappingTable() {
                         });
                       }}
                     />
+                  </TableCell>
+
+                  {/* Advanced Write Override - writeOnUpdate
+                   https://docs.withampersand.com/write-actions#prevent-overwriting-of-customer-data */}
+                  <TableCell className="w-1/4">
+                    <Select
+                      value={
+                        selectedObject?.objectName
+                          ? config
+                              .writeObject(selectedObject.objectName)
+                              .getWriteOnUpdateSetting(row.value)
+                          : undefined
+                      }
+                      disabled={isLoading || !selectedObject}
+                      onValueChange={(value: FieldSettingWriteOnUpdateEnum) => {
+                        const objectName = selectedObject?.objectName;
+                        if (!objectName) return;
+                        config.writeObject(objectName).setWriteOnUpdateSetting({
+                          fieldName: row.value,
+                          value: value,
+                        });
+                      }}
+                    >
+                      <SelectTrigger
+                        className={cn(
+                          "w-full",
+                          isLoading && "opacity-50 cursor-not-allowed"
+                        )}
+                      >
+                        <SelectValue placeholder="Select override" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem
+                          value={FieldSettingWriteOnUpdateEnum.Always}
+                        >
+                          Always
+                        </SelectItem>
+                        <SelectItem value={FieldSettingWriteOnUpdateEnum.Never}>
+                          Never
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                   </TableCell>
                 </TableRow>
               ))}
