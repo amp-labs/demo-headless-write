@@ -9,6 +9,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -38,10 +39,6 @@ const DYNAMIC_FIELDS = [
   {
     label: "Billing State/Province",
     value: "billingState",
-  },
-  {
-    label: "Billing Zip/Postal Code",
-    value: "billingZip",
   },
 ];
 
@@ -141,11 +138,14 @@ export function FieldMappingTable() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-1/2 items-center gap-2">
+                <TableHead className="w-1/3 items-center gap-2">
                   DYNAMIC FIELDS
                 </TableHead>
-                <TableHead className="w-1/2 items-center gap-2">
+                <TableHead className="w-1/3 items-center gap-2">
                   SALESFORCE FIELDS
+                </TableHead>
+                <TableHead className="w-1/3 items-center gap-2">
+                  DEFAULT VALUE
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -154,7 +154,7 @@ export function FieldMappingTable() {
               {DYNAMIC_FIELDS.map((row) => (
                 <TableRow key={row.value} className="hover:bg-muted/20">
                   {/* Dynamic field */}
-                  <TableCell className="w-1/2">
+                  <TableCell className="w-1/3">
                     <Select value={row.value} disabled={true}>
                       <SelectTrigger
                         className={cn(
@@ -175,7 +175,7 @@ export function FieldMappingTable() {
                   </TableCell>
 
                   {/* Salesforce field */}
-                  <TableCell className="w-1/2">
+                  <TableCell className="w-1/3">
                     <Select
                       value={
                         selectedObject &&
@@ -211,6 +211,36 @@ export function FieldMappingTable() {
                         ))}
                       </SelectContent>
                     </Select>
+                  </TableCell>
+
+                  {/* Default value - advanced write feature */}
+                  <TableCell className="w-1/3">
+                    <Input
+                      type="text"
+                      className={cn(
+                        "w-full px-3 py-2 border rounded-md",
+                        isLoading && "opacity-50 cursor-not-allowed"
+                      )}
+                      disabled={isLoading || !selectedObject}
+                      placeholder="Enter default value"
+                      value={
+                        selectedObject?.objectName
+                          ? config
+                              .writeObject(selectedObject?.objectName)
+                              .getDefaultValues(row.value)?.stringValue
+                          : ""
+                      }
+                      onChange={(e) => {
+                        const objectName = selectedObject?.objectName;
+                        if (!objectName) return;
+                        config.writeObject(objectName).setDefaultValues({
+                          fieldName: row.value,
+                          value: {
+                            stringValue: e.target.value,
+                          },
+                        });
+                      }}
+                    />
                   </TableCell>
                 </TableRow>
               ))}
