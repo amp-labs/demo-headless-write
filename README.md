@@ -3,11 +3,14 @@
 A React TypeScript application that demonstrates the @amp-labs/react headless library. The app allows users to map dynamic fields to Salesforce fields and manage installations.
 
 ## Features
+The **headless demo write app** uses a Salesforce integration, and extends the basic demo app with:
+- Usage of write features.
+- Ability to set default values for fields.
+- Ability to prevent overwriting of customer data.
 
-- Map dynamic fields to provider (i.e. Salesforce/Hubspot) fields
-- Handle read permissions for fields (config.readObjects)
-- Create and manage installations with configuration management (useConfig)
-- CRUD installation hooks
+<img width="1050" alt="headless-write-app-table" src="https://github.com/user-attachments/assets/91ba775e-c559-4a8e-80f6-a649c57be4f3" />
+
+[See simplified base demo this app extends](https://github.com/amp-labs/demo-headless)
 
 ## Tech Stack
 
