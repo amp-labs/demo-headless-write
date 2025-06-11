@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@amp-labs/react@^2.8.2":
-  version "2.8.2"
-  resolved "https://registry.yarnpkg.com/@amp-labs/react/-/react-2.8.2.tgz#68aefb2db6abc31ec40f3dbbb5154165cf569d7a"
-  integrity sha512-nCDEr3RqvK/Z3+cZsui7KxO+lSCFE8uLVNZwjV2f8O4rnwt6BD6ZclVhtN9KYes6yJQ6XppTqclpUuGe/aTyLQ==
+"@amp-labs/react@^2.8.3":
+  version "2.8.3"
+  resolved "https://registry.yarnpkg.com/@amp-labs/react/-/react-2.8.3.tgz#9068eef926092309ade847ade469fb8efadc24a6"
+  integrity sha512-u6icZsE4Bcl7wXNSvVnQbOczbmWRV90PWSvqNX3cFHf8WDcIgl/jdhpHl/qSls5f0ab5SGMag/TMwtNQV07j4A==
   dependencies:
     "@radix-ui/react-checkbox" "^1.1.2"
     "@radix-ui/react-icons" "^1.3.0"
