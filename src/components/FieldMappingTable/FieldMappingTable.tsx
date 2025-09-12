@@ -1,9 +1,9 @@
 import {
   FieldSettingWriteOnUpdateEnum,
-  useConfig,
   useCreateInstallation,
   useDeleteInstallation,
   useInstallation,
+  useLocalConfig,
   useManifest,
   useUpdateInstallation,
 } from "@amp-labs/react";
@@ -86,9 +86,9 @@ export function FieldMappingTable() {
   const { installation } = useInstallation();
 
   // ----------------------------------
-  // Config Read Hook
+  // Config Local Hook - helps manage local config state
   // ----------------------------------
-  const config = useConfig();
+  const config = useLocalConfig();
 
   // ----------------------------------
   // Mutation handlers
